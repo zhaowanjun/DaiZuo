@@ -1,16 +1,6 @@
 package com.vpr.vprlock.activity;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import net.tsz.afinal.FinalDb;
-import net.tsz.afinal.annotation.view.ViewInject;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
@@ -37,6 +27,19 @@ import com.vpr.vprlock.R;
 import com.vpr.vprlock.adapter.LockAppListAdapter;
 import com.vpr.vprlock.bean.AppInfo;
 import com.vpr.vprlock.utils.DimenUtils;
+import com.vpr.vprlock.utils.UITools;
+
+import net.tsz.afinal.FinalDb;
+import net.tsz.afinal.annotation.view.ViewInject;
+
+import org.simple.eventbus.EventBus;
+
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 加密app
@@ -60,6 +63,7 @@ public class LockAppActivity extends BaseActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		EventBus.getDefault().register(this);
 		setContentView(R.layout.activity_lock_app);
 		finalDb = FinalDb.create(this);
 		selectedAppMap = new HashMap<>();
@@ -256,9 +260,16 @@ public class LockAppActivity extends BaseActivity {
 	}
 
 	@Override
-	protected void onDestroy() {
-		super.onDestroy();
+	protected void onStop() {
+		super.onStop();
 		//退出当前界面时，保存数据到数据库
 		saveSelectedAppsToDB();
+		EventBus.getDefault().post(finalDb, "datebase_update");
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		EventBus.getDefault().unregister(this);
 	}
 }

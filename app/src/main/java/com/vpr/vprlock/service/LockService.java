@@ -17,8 +17,13 @@ import android.util.Log;
 
 import com.vpr.vprlock.activity.VerifyActivity;
 import com.vpr.vprlock.bean.AppInfo;
+import com.vpr.vprlock.utils.UITools;
 
 import net.tsz.afinal.FinalDb;
+
+import org.simple.eventbus.EventBus;
+import org.simple.eventbus.Subscriber;
+import org.simple.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +48,7 @@ public class LockService  extends Service{
     @Override
     public void onCreate() {
         super.onCreate();
+        EventBus.getDefault().register(this);
         handlerThread = new HandlerThread("count_thread");
         handlerThread.start();
 
@@ -99,6 +105,7 @@ public class LockService  extends Service{
                 if(mySortedMap != null && !mySortedMap.isEmpty()) {
                     String topPackageName =  mySortedMap.get(mySortedMap.lastKey()).getPackageName();
                     Log.e("TopPackage Name",topPackageName);
+                    System.out.println("============="+topPackageName);
                     //如果当前的Activity是桌面app,那么就需要将isUnLockActivity清空值
                     if(getHomes().contains(topPackageName)){
                         isUnLockActivity = false;
@@ -145,6 +152,18 @@ public class LockService  extends Service{
         return names;
     }
 
+    @Subscriber(mode = ThreadMode.MAIN, tag = "datebase_update")
+    public void databaseUpdate(FinalDb finalDb){
+        UITools.showToast(this, "已保存");
+        if(lockName != null) {
+            lockName.clear();
+        }
+        List<AppInfo> selectedAppList = FinalDb.create(this).findAllByWhere(AppInfo.class, "selected=1");
+        for(AppInfo item : selectedAppList) {
+            lockName.add(item.getPackageName());
+        }
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -153,5 +172,11 @@ public class LockService  extends Service{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         return Service.START_STICKY;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 }

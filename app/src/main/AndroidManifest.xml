@@ -32,9 +32,9 @@
 
         <activity android:name=".activity.TrainActivity"></activity>
         <activity android:name=".activity.ModelActivity"></activity>
-        <activity android:name=".activity.VerifyActivity"></activity>
+        <activity android:name=".activity.VerifyActivity"
+            android:launchMode="singleInstance"></activity>
         <activity android:name=".activity.LockAppActivity"></activity>
-
         <service android:name=".service.LockService"></service>
     </application>
 
