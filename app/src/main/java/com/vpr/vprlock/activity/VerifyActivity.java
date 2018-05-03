@@ -23,6 +23,8 @@ import com.vpr.vprlock.view.VolumeView;
 
 import net.tsz.afinal.annotation.view.ViewInject;
 
+import org.simple.eventbus.EventBus;
+
 /**
  * 声纹验证
  *
@@ -52,15 +54,19 @@ public class VerifyActivity extends BaseActivity {
     private SpeakerVerifier mVerifier = VPRApplication.getSpeakerVerifier();
     private boolean disableBack = false;
     private boolean mShowBackBtn;
+    private String mPackageName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EventBus.getDefault().register(this);
         setContentView(R.layout.activity_verify);
         initView();
     }
 
     private void initView() {
+        mPackageName = getIntent().getStringExtra("packageName");
+
         titleTv.setText("声纹验证");
         mShowBackBtn = getIntent().getBooleanExtra("ShowBackBtn", true);
         if (mShowBackBtn) {
@@ -120,6 +126,7 @@ public class VerifyActivity extends BaseActivity {
                 resultImage.setImageResource(R.drawable.ic_right);
                 centerTv.setText(Html.fromHtml("<h1><font color='green'>验证通过</font></h1>"));
                 if (disableBack) {
+                    EventBus.getDefault().post(mPackageName, "unlock");
                     finish();
                 }
             } else {
@@ -204,4 +211,9 @@ public class VerifyActivity extends BaseActivity {
         return super.onKeyDown(keyCode, event);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
 }

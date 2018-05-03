@@ -27,7 +27,6 @@ import com.vpr.vprlock.R;
 import com.vpr.vprlock.adapter.LockAppListAdapter;
 import com.vpr.vprlock.bean.AppInfo;
 import com.vpr.vprlock.utils.DimenUtils;
-import com.vpr.vprlock.utils.UITools;
 
 import net.tsz.afinal.FinalDb;
 import net.tsz.afinal.annotation.view.ViewInject;
@@ -76,6 +75,15 @@ public class LockAppActivity extends BaseActivity {
 		titleTv.setText("加密应用");
 		backBtn.setVisibility(View.VISIBLE);
 		loadingDialog.setLoadingMsg("正在加载应用数据");
+
+		loadingDialog.showLoadingDialog();
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				getUserApps();
+			}
+		}).start();
 	}
 
 	private boolean hasModule() {
@@ -122,14 +130,6 @@ public class LockAppActivity extends BaseActivity {
 			}
 		}
 
-		loadingDialog.showLoadingDialog();
-		new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				getUserApps();
-			}
-		}).start();
 	}
 
 	private class MyHandler extends Handler {
